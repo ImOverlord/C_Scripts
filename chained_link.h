@@ -12,6 +12,7 @@
 typedef struct node{
 	int data;
 	struct node *next;
+	struct node *previous;
 }Node;
 
 Node *create_list()
@@ -20,10 +21,26 @@ Node *create_list()
 
 	return (head);
 }
-
-Node *add_element(Node *head, int data)
+Node *get_last(Node *element)
 {
-	Node *current = head;
+	if (!element)
+		return (NULL);
+	while (element->next) {
+		element = element->next;
+	}
+	return (element);
+}
+Node *get_first(Node *element)
+{
+	if (!element)
+		return (NULL);
+	while (element->previous)
+		element = element->previous;
+	return (element);
+}
+Node *add_first(Node *head, int data)
+{
+	Node *current = get_first(head);
 	Node *newNode = (Node*)malloc(sizeof(Node));
 
 	if (newNode == NULL) {
@@ -31,14 +48,31 @@ Node *add_element(Node *head, int data)
 	}
 	newNode->data = data;
 	newNode->next = NULL;
+	newNode->previous = NULL;
 
-	if (!head) {
+	if (!current) {
 		head = newNode;
 	} else {
+		current->previous = newNode;
 		newNode->next = current;
 		head = newNode;
 	}
 	return (head);
+}
+Node *add_end(Node *element, int data)
+{
+	Node *newNode = (Node*)malloc(sizeof(Node));
+	
+	if (newNode == NULL)
+		exit(84);
+	if (!element)
+		return (NULL);
+	element = get_last(element);
+	element->next = newNode;
+	newNode->data = data;
+	newNode->previous = element;
+	newNode->next = NULL;
+	return (newNode);
 }
 int size(Node *head)
 {
@@ -53,21 +87,21 @@ int size(Node *head)
 	}
 	return (counter);
 }
-
-Node *delete1(Node *head, int data)
+Node *delete(Node *head, int data)
 {
 	Node *current = head;
 	Node *previous = NULL;
-	if (!current) {
+	Node *next = NULL;
+	if (!current)
 		return (NULL);
-	}
-
 	while (current) {
 		if (current->data == data) {
 			if (!previous) {
 				head = current->next;
 			} else {
 				previous->next = current->next;
+				next = current->next;
+				next->previous = previous;
 			}
 			free(current);
 			return (head);
